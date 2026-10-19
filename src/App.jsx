@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useMemo } from 'react'
 import './App.css'
 import { createEngine } from './engine/core.js'
+import { loadSampleSmall, loadSampleLarge } from './fixtures/loadSample.js'
 
 const TOTAL_ROWS = 50
 const TOTAL_COLS = 50
@@ -9,7 +10,7 @@ export default function App() {
   // Engine instance is created once and reused across renders
   // Note: The engine maintains its own internal state, so React state is only used for UI updates
   const [engine] = useState(() => createEngine(TOTAL_ROWS, TOTAL_COLS))
-  const [version, setVersion] = useState(0)
+  const [, setVersion] = useState(0)
   const [selectedCell, setSelectedCell] = useState(null)
   const [editingCell, setEditingCell] = useState(null)
   const [editValue, setEditValue] = useState('')
@@ -195,6 +196,16 @@ export default function App() {
     setEditValue('')
   }, [engine, forceRerender])
 
+  // ────── Sample data (fixtures/sales.tsv) ──────
+
+  const loadSample = useCallback((loader) => {
+    loader(engine)
+    forceRerender()
+    setSelectedCell({ r: 0, c: 0 })
+    setEditingCell(null)
+    setEditValue('')
+  }, [engine, forceRerender])
+
   // ────── Row / Column operations ──────
 
   const insertRow = useCallback(() => {
@@ -330,6 +341,11 @@ export default function App() {
           <div className="toolbar-group">
             <button className="toolbar-btn danger" onClick={clearSelectedCell}>✕ Cell</button>
             <button className="toolbar-btn danger" onClick={clearAllCells}>✕ All</button>
+          </div>
+
+          <div className="toolbar-group">
+            <button className="toolbar-btn" onClick={() => loadSample(loadSampleSmall)} title="Load fixtures/sales.tsv (33 rows) at A1">⬇ Sample 33</button>
+            <button className="toolbar-btn" onClick={() => loadSample(loadSampleLarge)} title="Load fixtures/sales-large.tsv (~3,000 rows) at A1">⬇ Sample 3k</button>
           </div>
         </div>
 

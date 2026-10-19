@@ -1,0 +1,1073 @@
+{
+  "_readme": "Golden answers for the AI query task, computed over fixtures/sales-large.tsv loaded at A1 (header in row 1, data below, totals row last). plan is what the mock provider returns for the prompt; expect is what your executor must produce from that plan (numbers within 0.01; row order matters only when the plan sorts). With a live provider the plan may differ in shape, but the numbers in expect are what graders compare your panel against.",
+  "source": {
+    "fixture": "fixtures/sales-large.tsv",
+    "headerRow": true,
+    "totalsRow": "last row"
+  },
+  "cases": [
+    {
+      "id": "q01",
+      "prompt": "What is the total sales by region?",
+      "plan": {
+        "type": "query",
+        "groupBy": [
+          "Region"
+        ],
+        "aggregates": [
+          {
+            "fn": "sum",
+            "column": "Total",
+            "as": "Total Sales"
+          }
+        ],
+        "sort": [
+          {
+            "column": "Total Sales",
+            "dir": "desc"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Region",
+          "Total Sales"
+        ],
+        "rows": [
+          [
+            "East",
+            5068230.89
+          ],
+          [
+            "Central",
+            4782456.33
+          ],
+          [
+            "North",
+            4438952.93
+          ],
+          [
+            "South",
+            4276858.77
+          ],
+          [
+            "West",
+            4081524.43
+          ]
+        ],
+        "rowCount": 5,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q02",
+      "prompt": "Top 3 sales reps by total sales",
+      "plan": {
+        "type": "query",
+        "groupBy": [
+          "Sales Rep"
+        ],
+        "aggregates": [
+          {
+            "fn": "sum",
+            "column": "Total",
+            "as": "Total Sales"
+          }
+        ],
+        "sort": [
+          {
+            "column": "Total Sales",
+            "dir": "desc"
+          }
+        ],
+        "limit": 3
+      },
+      "expect": {
+        "columns": [
+          "Sales Rep",
+          "Total Sales"
+        ],
+        "rows": [
+          [
+            "Noah Kim",
+            2164723.04
+          ],
+          [
+            "Arjun Mehta",
+            2064263.65
+          ],
+          [
+            "Priya Nair",
+            2026632.05
+          ]
+        ],
+        "rowCount": 3,
+        "truncated": true
+      }
+    },
+    {
+      "id": "q03",
+      "prompt": "How many orders were placed in the West region?",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Region",
+            "op": "eq",
+            "value": "West"
+          }
+        ],
+        "aggregates": [
+          {
+            "fn": "count",
+            "column": "Order ID",
+            "as": "Orders"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Orders"
+        ],
+        "rows": [
+          [
+            553
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q04",
+      "prompt": "What is the average discount on Electronics orders?",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Category",
+            "op": "eq",
+            "value": "Electronics"
+          }
+        ],
+        "aggregates": [
+          {
+            "fn": "avg",
+            "column": "Discount",
+            "as": "Avg Discount"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Avg Discount"
+        ],
+        "rows": [
+          [
+            0.1
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q05",
+      "prompt": "Which product sold the most units?",
+      "plan": {
+        "type": "query",
+        "groupBy": [
+          "Product"
+        ],
+        "aggregates": [
+          {
+            "fn": "sum",
+            "column": "Units",
+            "as": "Units Sold"
+          }
+        ],
+        "sort": [
+          {
+            "column": "Units Sold",
+            "dir": "desc"
+          }
+        ],
+        "limit": 1
+      },
+      "expect": {
+        "columns": [
+          "Product",
+          "Units Sold"
+        ],
+        "rows": [
+          [
+            "Antivirus 1yr",
+            7524
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": true
+      }
+    },
+    {
+      "id": "q06",
+      "prompt": "Show me orders with a total over 5000",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Total",
+            "op": "gt",
+            "value": 5000
+          }
+        ],
+        "columns": [
+          "Order ID",
+          "Sales Rep",
+          "Total"
+        ],
+        "sort": [
+          {
+            "column": "Total",
+            "dir": "desc"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Order ID",
+          "Sales Rep",
+          "Total"
+        ],
+        "rowCount": 500,
+        "truncated": true,
+        "rowsPreview": [
+          [
+            "ORD-11838",
+            "Isabella Rossi",
+            "$68,400.00"
+          ],
+          [
+            "ORD-12894",
+            "Priya Nair",
+            "$68,400.00"
+          ],
+          [
+            "ORD-10684",
+            "Chen Wei",
+            "$67,850.00"
+          ],
+          [
+            "ORD-10938",
+            "Chen Wei",
+            "$67,200.00"
+          ],
+          [
+            "ORD-10455",
+            "Sofia Alvarez",
+            "$66,700.00"
+          ],
+          [
+            "ORD-12232",
+            "Arjun Mehta",
+            "$66,700.00"
+          ],
+          [
+            "ORD-10995",
+            "Arjun Mehta",
+            "$66,240.00"
+          ],
+          [
+            "ORD-11294",
+            "Noah Kim",
+            "$66,240.00"
+          ],
+          [
+            "ORD-11451",
+            "Priya Nair",
+            "$66,000.00"
+          ],
+          [
+            "ORD-10703",
+            "Aarav Shah",
+            "$64,980.00"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q07",
+      "prompt": "How many orders were placed in February 2024?",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Date",
+            "op": "gte",
+            "value": "2024-02-01"
+          },
+          {
+            "column": "Date",
+            "op": "lt",
+            "value": "2024-03-01"
+          }
+        ],
+        "aggregates": [
+          {
+            "fn": "count",
+            "column": "Order ID",
+            "as": "Orders"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Orders"
+        ],
+        "rows": [
+          [
+            128
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q08",
+      "prompt": "Total units per category",
+      "plan": {
+        "type": "query",
+        "groupBy": [
+          "Category"
+        ],
+        "aggregates": [
+          {
+            "fn": "sum",
+            "column": "Units",
+            "as": "Units"
+          }
+        ],
+        "sort": [
+          {
+            "column": "Units",
+            "dir": "desc"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Category",
+          "Units"
+        ],
+        "rows": [
+          [
+            "Electronics",
+            27917
+          ],
+          [
+            "Furniture",
+            27577
+          ],
+          [
+            "Accessories",
+            19143
+          ],
+          [
+            "Software",
+            14552
+          ]
+        ],
+        "rowCount": 4,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q09",
+      "prompt": "How many different sales reps are there?",
+      "plan": {
+        "type": "query",
+        "aggregates": [
+          {
+            "fn": "countDistinct",
+            "column": "Sales Rep",
+            "as": "Reps"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Reps"
+        ],
+        "rows": [
+          [
+            12
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q10",
+      "prompt": "What is the highest unit price in the Furniture category?",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Category",
+            "op": "eq",
+            "value": "Furniture"
+          }
+        ],
+        "aggregates": [
+          {
+            "fn": "max",
+            "column": "Unit Price",
+            "as": "Max Price"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Max Price"
+        ],
+        "rows": [
+          [
+            650
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q11",
+      "prompt": "Break down sales by region and category",
+      "plan": {
+        "type": "query",
+        "groupBy": [
+          "Region",
+          "Category"
+        ],
+        "aggregates": [
+          {
+            "fn": "sum",
+            "column": "Total",
+            "as": "Total Sales"
+          }
+        ],
+        "sort": [
+          {
+            "column": "Region",
+            "dir": "asc"
+          },
+          {
+            "column": "Total Sales",
+            "dir": "desc"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Region",
+          "Category",
+          "Total Sales"
+        ],
+        "rows": [
+          [
+            "Central",
+            "Electronics",
+            2810622.53
+          ],
+          [
+            "Central",
+            "Furniture",
+            1526992.69
+          ],
+          [
+            "Central",
+            "Accessories",
+            234589
+          ],
+          [
+            "Central",
+            "Software",
+            210252.11
+          ],
+          [
+            "East",
+            "Electronics",
+            3110726.88
+          ],
+          [
+            "East",
+            "Furniture",
+            1528254.34
+          ],
+          [
+            "East",
+            "Accessories",
+            278482.82
+          ],
+          [
+            "East",
+            "Software",
+            150766.85
+          ],
+          [
+            "North",
+            "Electronics",
+            2532662.66
+          ],
+          [
+            "North",
+            "Furniture",
+            1395890.87
+          ],
+          [
+            "North",
+            "Accessories",
+            276550.05
+          ],
+          [
+            "North",
+            "Software",
+            233849.35
+          ],
+          [
+            "South",
+            "Electronics",
+            2502677.35
+          ],
+          [
+            "South",
+            "Furniture",
+            1369501.24
+          ],
+          [
+            "South",
+            "Accessories",
+            236802.82
+          ],
+          [
+            "South",
+            "Software",
+            167877.36
+          ],
+          [
+            "West",
+            "Electronics",
+            2577266.94
+          ],
+          [
+            "West",
+            "Furniture",
+            1118495.32
+          ],
+          [
+            "West",
+            "Accessories",
+            220182.72
+          ],
+          [
+            "West",
+            "Software",
+            165579.45
+          ]
+        ],
+        "rowCount": 20,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q12",
+      "prompt": "How many orders were handled by reps whose name starts with A?",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Sales Rep",
+            "op": "startsWith",
+            "value": "A"
+          }
+        ],
+        "aggregates": [
+          {
+            "fn": "count",
+            "column": "Order ID",
+            "as": "Orders"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Orders"
+        ],
+        "rows": [
+          [
+            980
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q13",
+      "prompt": "Number of distinct order IDs",
+      "plan": {
+        "type": "query",
+        "aggregates": [
+          {
+            "fn": "countDistinct",
+            "column": "Order ID",
+            "as": "Distinct Orders"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Distinct Orders"
+        ],
+        "rows": [
+          [
+            2974
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q14",
+      "prompt": "What is the total revenue by territory?",
+      "plan": {
+        "type": "query",
+        "groupBy": [
+          "Territory"
+        ],
+        "aggregates": [
+          {
+            "fn": "sum",
+            "column": "Total",
+            "as": "Revenue"
+          }
+        ]
+      },
+      "expect": {
+        "error": "UNKNOWN_COLUMN",
+        "detail": "UNKNOWN_COLUMN:Territory"
+      }
+    },
+    {
+      "id": "q15",
+      "prompt": "Give me everything",
+      "plan": {
+        "type": "query",
+        "limit": 100000
+      },
+      "expect": {
+        "columns": [
+          "Order ID",
+          "Date",
+          "Region",
+          "Sales Rep",
+          "Product",
+          "Category",
+          "Units",
+          "Unit Price",
+          "Discount",
+          "Total"
+        ],
+        "rowCount": 500,
+        "truncated": true,
+        "rowsPreview": [
+          [
+            "ORD-10001",
+            "2023-02-03",
+            "Central",
+            "Marco Rossi",
+            "Tablet 10",
+            "Electronics",
+            "28",
+            "$499.00",
+            "5%",
+            "$13,273.40"
+          ],
+          [
+            "ORD-10002",
+            "2023-01-10",
+            "West",
+            "Aarav Shah",
+            "Bookshelf",
+            "Furniture",
+            "10",
+            "$240.00",
+            "20%",
+            "$1,920.00"
+          ],
+          [
+            "ORD-10003",
+            "2023-05-19",
+            "South",
+            "Marco Rossi",
+            "Standing Desk",
+            "Furniture",
+            "53",
+            "$599.00",
+            "15 %",
+            "$26,984.95"
+          ],
+          [
+            "ORD-10004",
+            "2024-05-02",
+            "East",
+            "Arjun Mehta",
+            "Desk Chair",
+            "Furniture",
+            "38",
+            "$210.00",
+            "10%",
+            "$7,182.00"
+          ],
+          [
+            "ORD-10005",
+            "8/8/2023",
+            "North",
+            "Noah Kim",
+            "Bookshelf",
+            "Furniture",
+            "16",
+            "$220.00",
+            "0.12",
+            "$3,097.60"
+          ],
+          [
+            "ORD-10006",
+            "2023-12-04",
+            "West",
+            "Lucas Meyer",
+            "Antivirus 1yr",
+            "Software",
+            "26",
+            "$ 39.99",
+            "0.1",
+            "$935.77"
+          ],
+          [
+            "ORD-10007",
+            "2023-12-09",
+            "West",
+            "Marco Rossi",
+            "Office Suite License",
+            "Software",
+            "39",
+            "$99.00",
+            "5%",
+            "$3,667.95"
+          ],
+          [
+            "ORD-10008",
+            "2023-06-18",
+            "North",
+            "Arjun Mehta",
+            "Antivirus 1yr",
+            "Software",
+            "52",
+            "$39.99",
+            "n/a",
+            "$2,079.48"
+          ],
+          [
+            "ORD-10009",
+            "2024-08-07",
+            "East",
+            "Alice Wong",
+            "Desk Chair",
+            "Furniture",
+            "39",
+            "$210.00",
+            "",
+            "$8,190.00"
+          ],
+          [
+            "ORD-10010",
+            "2023-10-27",
+            "North",
+            "Sofia Alvarez",
+            "Office Suite License",
+            "Software",
+            "13",
+            "$99.00",
+            "20%",
+            "$1,029.60"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "q16",
+      "prompt": "Delete all orders from the East region",
+      "plan": {
+        "type": "mutation",
+        "action": "deleteRows",
+        "filters": [
+          {
+            "column": "Region",
+            "op": "eq",
+            "value": "East"
+          }
+        ]
+      },
+      "expect": {
+        "error": "READ_ONLY"
+      }
+    },
+    {
+      "id": "q17",
+      "prompt": "Average order total per region in 2024",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Date",
+            "op": "gte",
+            "value": "2024-01-01"
+          },
+          {
+            "column": "Date",
+            "op": "lt",
+            "value": "2025-01-01"
+          }
+        ],
+        "groupBy": [
+          "Region"
+        ],
+        "aggregates": [
+          {
+            "fn": "avg",
+            "column": "Total",
+            "as": "Avg Total"
+          }
+        ],
+        "sort": [
+          {
+            "column": "Avg Total",
+            "dir": "desc"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Region",
+          "Avg Total"
+        ],
+        "rows": [
+          [
+            "Central",
+            8012.38
+          ],
+          [
+            "West",
+            7898.08
+          ],
+          [
+            "South",
+            7767.9
+          ],
+          [
+            "North",
+            7562.99
+          ],
+          [
+            "East",
+            7490.09
+          ]
+        ],
+        "rowCount": 5,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q18",
+      "prompt": "How many orders have no discount recorded?",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Discount",
+            "op": "isEmpty"
+          }
+        ],
+        "aggregates": [
+          {
+            "fn": "count",
+            "column": "Order ID",
+            "as": "Orders"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Orders"
+        ],
+        "rows": [
+          [
+            252
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": false
+      }
+    },
+    {
+      "id": "q19",
+      "prompt": "Which sales rep sold the most Software by units?",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Category",
+            "op": "eq",
+            "value": "Software"
+          }
+        ],
+        "groupBy": [
+          "Sales Rep"
+        ],
+        "aggregates": [
+          {
+            "fn": "sum",
+            "column": "Units",
+            "as": "Units"
+          }
+        ],
+        "sort": [
+          {
+            "column": "Units",
+            "dir": "desc"
+          }
+        ],
+        "limit": 1
+      },
+      "expect": {
+        "columns": [
+          "Sales Rep",
+          "Units"
+        ],
+        "rows": [
+          [
+            "Chen Wei",
+            1523
+          ]
+        ],
+        "rowCount": 1,
+        "truncated": true
+      }
+    },
+    {
+      "id": "q20",
+      "prompt": "List orders over 20000 in the Central region",
+      "plan": {
+        "type": "query",
+        "filters": [
+          {
+            "column": "Region",
+            "op": "eq",
+            "value": "Central"
+          },
+          {
+            "column": "Total",
+            "op": "gt",
+            "value": 20000
+          }
+        ],
+        "columns": [
+          "Order ID",
+          "Date",
+          "Sales Rep",
+          "Total"
+        ],
+        "sort": [
+          {
+            "column": "Total",
+            "dir": "desc"
+          }
+        ]
+      },
+      "expect": {
+        "columns": [
+          "Order ID",
+          "Date",
+          "Sales Rep",
+          "Total"
+        ],
+        "rowCount": 69,
+        "truncated": false,
+        "rowsPreview": [
+          [
+            "ORD-10684",
+            "7/19/2023",
+            "Chen Wei",
+            "$67,850.00"
+          ],
+          [
+            "ORD-12232",
+            "2023-03-15",
+            "Arjun Mehta",
+            "$66,700.00"
+          ],
+          [
+            "ORD-11451",
+            "21 Jul 2024",
+            "Priya Nair",
+            "$66,000.00"
+          ],
+          [
+            "ORD-12294",
+            "2023-11-07",
+            "Arjun Mehta",
+            "$60,720.00"
+          ],
+          [
+            "ORD-10359",
+            "2024-05-17",
+            "Sofia Alvarez",
+            "$60,087.50"
+          ],
+          [
+            "ORD-12198",
+            "2024-01-24",
+            "Arjun Mehta",
+            "$59,800.00"
+          ],
+          [
+            "ORD-12488",
+            "2024-07-20",
+            "Alice Wong",
+            "$58,190.00"
+          ],
+          [
+            "ORD-12469",
+            "2024-11-14",
+            "Priya Nair",
+            "$57,408.00"
+          ],
+          [
+            "ORD-11564",
+            "4/30/2024",
+            "Arjun Mehta",
+            "$55,660.00"
+          ],
+          [
+            "ORD-10680",
+            "2023-04-14",
+            "Sofia Alvarez",
+            "$49,680.00"
+          ]
+        ]
+      }
+    }
+  ]
+}

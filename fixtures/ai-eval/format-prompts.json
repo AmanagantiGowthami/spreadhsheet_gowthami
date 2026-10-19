@@ -1,0 +1,144 @@
+{
+  "_readme": "Golden AI formatting set. Load fixtures/sales.tsv (toolbar: Sample 33) at A1 first (header row 1, data rows 2-32, totals row 33, 10 columns A-J). `action` is what the mock provider returns for the prompt; `expect` lists what must be true after it is applied through YOUR style system. Every applied action must be reverted by exactly ONE undo. With a live provider the action may differ in detail, but the `expect` checks must still hold.",
+  "cases": [
+    {
+      "id": "f01",
+      "prompt": "Format this as a clean table",
+      "action": {
+        "type": "format_sheet",
+        "headerStyle": { "bold": true, "bg": "#f0f0f0", "align": "center" },
+        "columns": [
+          { "col": 6, "style": { "align": "right", "numberFormat": "number" } },
+          { "col": 7, "style": { "align": "right", "numberFormat": "currency" } },
+          { "col": 8, "style": { "align": "right", "numberFormat": "percent" } },
+          { "col": 9, "style": { "align": "right", "numberFormat": "currency" } }
+        ],
+        "totalsStyle": { "bold": true },
+        "freezeRows": 1,
+        "autoFitColumns": true
+      },
+      "expect": [
+        { "cell": "A1", "style": { "bold": true, "bg": "#f0f0f0", "align": "center" } },
+        { "cell": "J1", "style": { "bold": true } },
+        { "cell": "A33", "style": { "bold": true }, "note": "row 33 is the totals row" },
+        { "cell": "A32", "style": { "bold": false } },
+        { "cell": "H2", "display": "$1,200.00" },
+        { "cell": "H7", "display": "$79.00", "note": "raw value is 79 with no symbol" },
+        { "cell": "I2", "display": "10%" },
+        { "cell": "I6", "display": "10%", "note": "raw value is 0.1" },
+        { "cell": "I14", "display": "n/a", "note": "non-numeric text is left alone" },
+        { "cell": "H1", "display": "Unit Price", "note": "the header row is never number-formatted" },
+        { "cell": "G2", "style": { "align": "right" } },
+        { "frozenRows": 1 },
+        { "undoSteps": 1 }
+      ]
+    },
+    {
+      "id": "f02",
+      "prompt": "Make the header row bold and blue",
+      "action": { "type": "format_sheet", "headerStyle": { "bold": true, "bg": "#cce5ff" } },
+      "expect": [
+        { "cell": "A1", "style": { "bold": true, "bg": "#cce5ff" } },
+        { "cell": "J1", "style": { "bold": true, "bg": "#cce5ff" } },
+        { "cell": "K1", "style": { "bold": false }, "note": "K is outside the used range" },
+        { "cell": "A2", "style": { "bold": false } },
+        { "undoSteps": 1 }
+      ]
+    },
+    {
+      "id": "f03",
+      "prompt": "Show unit prices and totals as currency with two decimals",
+      "action": {
+        "type": "format_sheet",
+        "columns": [
+          { "col": 7, "style": { "numberFormat": "currency" } },
+          { "col": 9, "style": { "numberFormat": "currency" } }
+        ]
+      },
+      "expect": [
+        { "cell": "H7", "display": "$79.00" },
+        { "cell": "H32", "display": "$49.99", "note": "raw value is \"$ 49.99\" with a space" },
+        { "cell": "J2", "display": "$4,320.00" },
+        { "cell": "J22", "display": "", "note": "blank stays blank" },
+        { "cell": "H1", "display": "Unit Price" },
+        { "cell": "H2", "raw": "$1,200.00", "note": "formatting never rewrites the stored value" },
+        { "undoSteps": 1 }
+      ]
+    },
+    {
+      "id": "f04",
+      "prompt": "Unfreeze the header row",
+      "action": { "type": "format_sheet", "freezeRows": 0 },
+      "expect": [
+        { "frozenRows": 0 },
+        { "undoSteps": 1, "note": "only if something was frozen before; otherwise NO_CHANGES and no undo entry" }
+      ]
+    },
+    {
+      "id": "f05",
+      "prompt": "Right-align every number column and set the body font size to 12",
+      "action": {
+        "type": "format_sheet",
+        "bodyStyle": { "fontSize": 12 },
+        "columns": [
+          { "col": 6, "style": { "align": "right" } },
+          { "col": 7, "style": { "align": "right" } },
+          { "col": 8, "style": { "align": "right" } },
+          { "col": 9, "style": { "align": "right" } }
+        ]
+      },
+      "expect": [
+        { "cell": "G2", "style": { "align": "right", "fontSize": 12 } },
+        { "cell": "A2", "style": { "align": "left", "fontSize": 12 } },
+        { "cell": "A1", "style": { "fontSize": 13 }, "note": "the header is not body" },
+        { "undoSteps": 1 }
+      ]
+    },
+    {
+      "id": "f06",
+      "prompt": "Remove all formatting",
+      "action": { "type": "format_sheet", "clearFormatting": true },
+      "expect": [
+        { "cell": "A1", "style": { "bold": false, "bg": "white" } },
+        { "cell": "H2", "display": "$1,200.00", "note": "back to the raw text" },
+        { "undoSteps": 1 }
+      ]
+    },
+    {
+      "id": "f07",
+      "prompt": "Make column Z bold",
+      "action": { "type": "format_sheet", "columns": [ { "col": 25, "style": { "bold": true } } ] },
+      "expect": [
+        { "result": "NO_CHANGES", "note": "column 25 is outside the 10-column table; nothing is written, nothing throws, no undo entry" }
+      ]
+    },
+    {
+      "id": "f08",
+      "prompt": "Freeze the first 50 rows",
+      "action": { "type": "format_sheet", "freezeRows": 50 },
+      "expect": [
+        { "result": "OUT_OF_RANGE", "note": "freezing 50 of 33 rows would freeze the whole table; refuse with a message, change nothing" }
+      ]
+    },
+    {
+      "id": "f09",
+      "prompt": "Highlight the totals row in yellow",
+      "action": { "type": "format_sheet", "totalsStyle": { "bg": "#ffff99" } },
+      "expect": [
+        { "cell": "A33", "style": { "bg": "#ffff99" } },
+        { "cell": "J33", "style": { "bg": "#ffff99" } },
+        { "cell": "A32", "style": { "bg": "white" } },
+        { "undoSteps": 1 }
+      ]
+    },
+    {
+      "id": "f10",
+      "prompt": "Bold the totals row",
+      "precondition": "Delete row 33 first, so the last row is ORD-1029 (an ordinary data row).",
+      "action": { "type": "format_sheet", "totalsStyle": { "bold": true } },
+      "expect": [
+        { "result": "NO_CHANGES", "note": "the last row is not a totals row; the style must be dropped, not applied to an ordinary order" }
+      ]
+    }
+  ]
+}

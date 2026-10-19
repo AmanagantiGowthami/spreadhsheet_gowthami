@@ -916,6 +916,12 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         redo,
         canUndo: () => undoStack.length > 0,
         canRedo: () => redoStack.length > 0,
+        // Grow the grid so that at least minRows x minCols exist. The engine is
+        // sparse, so this only moves the bounds; nothing is allocated.
+        ensureCapacity: (minRows, minCols) => {
+            if (minRows > rows) rows = minRows
+            if (minCols > cols) cols = minCols
+        },
         // Internal state is not exposed - if you need to serialize/deserialize,
         // you'll need to work with the public API or add new methods
     }
