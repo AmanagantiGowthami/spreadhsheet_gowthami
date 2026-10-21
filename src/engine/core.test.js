@@ -6,7 +6,6 @@ import { describe, it, expect } from 'vitest'
 import { createEngine } from './core.js'
 
 describe('engine basics', () => {
-    // This test FAILS on a fresh clone. Making it pass is Task 0 in CHALLENGE.md.
     it('evaluates arithmetic and ranges', () => {
         const engine = createEngine(10, 10)
         engine.setCell(0, 0, '10')

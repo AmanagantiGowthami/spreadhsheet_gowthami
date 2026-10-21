@@ -65,8 +65,6 @@ spreadhsheet/
 - Bold / italic / underline, font size, alignment, text and background colour, per cell.
 - Undo / redo of cell edits and of row/column insert and delete, with formula references shifted.
 
-Some of the above is not as working as it looks. That is where `CHALLENGE.md` starts.
-
 ## Browser support
 
 Current Chrome, Firefox, Safari and Edge.

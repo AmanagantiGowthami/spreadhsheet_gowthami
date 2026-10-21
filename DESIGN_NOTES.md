@@ -2,10 +2,9 @@
 
 Fill this in as you work. Keep it factual and short; bullet points are fine. Graders read this before your code.
 
-## Tasks attempted
+## Challenges
 
-- Task 0 — warm-up
-- Task … —
+- Challenge N — notes
 
 ## Data model changes
 
@@ -21,7 +20,7 @@ For each user action you added: what a single `Ctrl+Z` reverts.
 
 ## Defects found in the existing code
 
-For each: where, symptom, root cause (two or three sentences), fix, test that covers it.
+For each: where, symptom, root cause (two or three sentences), fix.
 
 ## Measurements
 

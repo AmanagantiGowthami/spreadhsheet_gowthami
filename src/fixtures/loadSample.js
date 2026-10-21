@@ -1,7 +1,7 @@
 // Loads a fixture TSV into the engine starting at A1.
 // Deliberately minimal: one setCell per cell, no styling, no type coercion.
-// If you build the clipboard task you will probably replace this with your
-// own import path. That is fine as long as both "Load" buttons keep working.
+// You may replace this with your own import path. That is fine as long as
+// both "Load" buttons keep working.
 import salesSmall from '../../fixtures/sales.tsv?raw'
 import salesLarge from '../../fixtures/sales-large.tsv?raw'
 
