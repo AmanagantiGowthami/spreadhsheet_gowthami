@@ -792,6 +792,69 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         recalculate()
     }
 
+    function executeSetCells(changes) {
+        if (!Array.isArray(changes)) {
+            throw new Error('Changes must be an array')
+        }
+
+        const previous = new Map()
+
+        for (const change of changes) {
+            const { row, col, value } = change
+
+            if (
+                !Number.isInteger(row) ||
+                !Number.isInteger(col) ||
+                row < 0 ||
+                col < 0 ||
+                row >= rows ||
+                col >= cols ||
+                typeof value !== 'string'
+            ) {
+                throw new Error('Invalid cell change')
+            }
+
+            const key = cellKey(row, col)
+
+            if (!previous.has(key)) {
+                previous.set(key, {
+                    row,
+                    col,
+                    value: getCellRaw(row, col).raw
+                })
+            }
+        }
+
+        const next = new Map()
+
+        for (const change of changes) {
+            next.set(cellKey(change.row, change.col), change)
+        }
+
+        const changed = [...next.values()].filter(change => {
+            return getCellRaw(change.row, change.col).raw !== change.value
+        })
+
+        if (changed.length === 0) return false
+
+        const oldValues = [...previous.values()]
+
+        pushToUndoStack({
+            type: 'bulk',
+            oldValues,
+            newValues: [...next.values()]
+        })
+
+        for (const change of changed) {
+            setCellRaw(change.row, change.col, change.value)
+        }
+
+        _generation++
+        recalculate()
+
+        return true
+    }
+
     function executeInsertRow(atIndex) {
         const snapshot = takeSnapshot()
         const previousRows = rows
@@ -835,7 +898,19 @@ export function createEngine(initialRows = 50, initialCols = 50) {
             setCellRaw(entry.r, entry.c, entry.oldVal)
             _generation++
             recalculate()
-        } else {
+        } else if (entry.type === 'bulk'){
+            redoStack.push(entry)
+            for (const change of entry.oldValues){
+                setCellRaw(
+                    change.row,
+                    change.col,
+                    change.value
+                )
+            }
+            _generation++
+            recalculate()
+        }
+        else {
             // For structural changes (row/col insert/delete), save current state to redo
             // and restore the snapshot from undo entry
             // Note: The snapshot contains the cell data, but rows/cols must be restored separately
@@ -865,7 +940,19 @@ export function createEngine(initialRows = 50, initialCols = 50) {
             setCellRaw(entry.r, entry.c, entry.newVal)
             _generation++
             recalculate()
-        } else {
+        } else if (entry.type === 'bulk'){
+            undoStack.push(entry)
+            for (const change of entry.newValues){
+                setCellRaw(
+                    change.row,
+                    change.col,
+                    change.value
+                )
+            }
+            _generation++
+            recalculate()
+        }
+        else {
             undoStack.push({
                 ...entry,
                 snap: takeSnapshot(),
@@ -908,6 +995,7 @@ export function createEngine(initialRows = 50, initialCols = 50) {
         get cols() { return cols },
         getCell: getCellForDisplay,
         setCell: executeSetCell,
+        setCells: executeSetCells,
         insertRow: executeInsertRow,
         deleteRow: executeDeleteRow,
         insertColumn: executeInsertColumn,
