@@ -274,14 +274,22 @@ function parseTokensToAST(tokens) {
             }
             position++
         } else if (token.type === 'range') {
-            if (outputQueue.length < 2) throw new Error('Invalid range syntax')
-            const endCell = outputQueue.pop()
             const startCell = outputQueue.pop()
-            if (startCell.type !== 'cell' || endCell.type !== 'cell') {
-                throw new Error('Range must be between two cell references')
+            const endCell = tokens[position + 1]
+            if (
+                !startCell ||
+                !endCell ||
+                startCell.type !== 'cell' ||
+                endCell.type !== 'cell'
+            ) {
+                throw new Error('Invalid range syntax')
             }
-            outputQueue.push({ type: 'range', start: startCell.value, end: endCell.value })
-            position++
+            outputQueue.push({
+                type: 'range',
+                start: startCell.value,
+                end: endCell.value
+            })
+            position += 2
         } else {
             position++
         }
@@ -898,9 +906,9 @@ export function createEngine(initialRows = 50, initialCols = 50) {
             setCellRaw(entry.r, entry.c, entry.oldVal)
             _generation++
             recalculate()
-        } else if (entry.type === 'bulk'){
+        } else if (entry.type === 'bulk') {
             redoStack.push(entry)
-            for (const change of entry.oldValues){
+            for (const change of entry.oldValues) {
                 setCellRaw(
                     change.row,
                     change.col,
@@ -940,9 +948,9 @@ export function createEngine(initialRows = 50, initialCols = 50) {
             setCellRaw(entry.r, entry.c, entry.newVal)
             _generation++
             recalculate()
-        } else if (entry.type === 'bulk'){
+        } else if (entry.type === 'bulk') {
             undoStack.push(entry)
-            for (const change of entry.newValues){
+            for (const change of entry.newValues) {
                 setCellRaw(
                     change.row,
                     change.col,
