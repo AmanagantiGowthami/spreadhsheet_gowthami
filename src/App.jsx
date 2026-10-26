@@ -12,7 +12,31 @@ export default function App() {
   const [engine] = useState(() => createEngine(TOTAL_ROWS, TOTAL_COLS))
   const [, setVersion] = useState(0)
   const [selectedCell, setSelectedCell] = useState(null)
+  const [selection, setSelection] = useState(null)
+  const [isSelecting, setIsSelecting] = useState(false)
+
+  const selectionAnchor = useRef(null)
+
+  const selectRange = useCallback((startRow, startCol, endRow, endCol) => {
+    setSelection({
+      startRow: Math.min(startRow, endRow),
+      startCol: Math.min(startCol, endCol),
+      endRow: Math.max(startRow, endRow),
+      endCol: Math.max(startCol, endCol),
+    })
+  }, [])
   const [editingCell, setEditingCell] = useState(null)
+
+  const isCellInSelection = (row, col) => {
+    if (!selection) return false
+
+    return (
+      row >= selection.startRow &&
+      row <= selection.endRow &&
+      col >= selection.startCol &&
+      col <= selection.endCol
+    )
+  }
   const [editValue, setEditValue] = useState('')
   // Cell styles are stored separately from engine data
   // Format: { "row,col": { bold: bool, italic: bool, ... } }
@@ -58,15 +82,6 @@ export default function App() {
     }
     setEditingCell(null)
   }, [engine, editValue, forceRerender])
-
-  const handleCellClick = useCallback((row, col) => {
-    if (editingCell && (editingCell.r !== row || editingCell.c !== col)) {
-      commitEdit(editingCell.r, editingCell.c)
-    }
-    if (!editingCell || editingCell.r !== row || editingCell.c !== col) {
-      startEditing(row, col)
-    }
-  }, [editingCell, commitEdit, startEditing])
 
   // ────── Keyboard navigation ──────
 
@@ -363,7 +378,10 @@ export default function App() {
         </div>
 
         {/* ── Grid ── */}
-        <div className="grid-scroll">
+        <div className="grid-scroll"
+          onMouseUp={() => setIsSelecting(false)}
+          onMouseLeave={() => setIsSelecting(false)}
+        >
           <table className="grid-table">
             <thead>
               <tr>
@@ -381,6 +399,7 @@ export default function App() {
                   <td className="row-header">{rowIndex + 1}</td>
                   {Array.from({ length: engine.cols }, (_, colIndex) => {
                     const isSelected = selectedCell?.r === rowIndex && selectedCell?.c === colIndex
+                    const isRangeSelected = isCellInSelection(rowIndex, colIndex)
                     const isEditing = editingCell?.r === rowIndex && editingCell?.c === colIndex
                     const cellData = engine.getCell(rowIndex, colIndex)
                     const style = cellStyles[`${rowIndex},${colIndex}`] || {}
@@ -391,9 +410,49 @@ export default function App() {
                     return (
                       <td
                         key={colIndex}
-                        className={`cell ${isSelected ? 'selected' : ''}`}
+                        className={`cell ${isSelected ? 'selected' : ''} ${isRangeSelected ? 'range-selected' : ''}`}
                         style={{ background: style.bg || 'white' }}
-                        onMouseDown={(e) => { e.preventDefault(); handleCellClick(rowIndex, colIndex) }}
+                        onMouseDown={(e) => {
+                          if (e.button !== 0) return
+
+                          e.preventDefault()
+
+                          if (editingCell) {
+                            commitEdit(editingCell.r, editingCell.c)
+                          }
+
+                          setEditingCell(null)
+                          setSelectedCell({ r: rowIndex, c: colIndex })
+
+                          if (e.shiftKey && selectionAnchor.current) {
+                            selectRange(
+                              selectionAnchor.current.r,
+                              selectionAnchor.current.c,
+                              rowIndex,
+                              colIndex
+                            )
+                          } else {
+                            selectionAnchor.current = {
+                              r: rowIndex,
+                              c: colIndex
+                            }
+
+                            selectRange(rowIndex, colIndex, rowIndex, colIndex)
+                          }
+
+                          setIsSelecting(true)
+                        }}
+                        onMouseEnter={() => {
+                          if (!isSelecting || !selectionAnchor.current) return
+
+                          selectRange(
+                            selectionAnchor.current.r,
+                            selectionAnchor.current.c,
+                            rowIndex,
+                            colIndex
+                          )
+                        }}
+                        onDoubleClick={() => startEditing(rowIndex, colIndex)}
                       >
                         {isEditing ? (
                           <input
